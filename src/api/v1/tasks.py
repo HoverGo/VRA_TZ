@@ -1,7 +1,7 @@
 import uuid
 import datetime
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Body
 from typing import List, Optional
 
 
@@ -12,7 +12,7 @@ from src.schemas.task_schemas import TaskCreate, TaskResponse, TaskStatus, TaskU
 router = APIRouter()
 
 @router.post("/tasks", response_model=TaskResponse, status_code=201)
-async def create_task(task_data: TaskCreate = Depends(TaskCreate)) -> TaskResponse:
+async def create_task(task_data: TaskCreate = Body(TaskCreate)) -> TaskResponse:
     task_id = str(uuid.uuid4())
     now = datetime.datetime.now(datetime.timezone.utc).isoformat()
     
@@ -87,7 +87,7 @@ async def get_tasks(status: Optional[TaskStatus] = None) -> List[TaskResponse]:
             ]
     
 @router.patch("/tasks/{task_id}", response_model=TaskResponse)
-async def update_task(task_update: TaskUpdate = Depends(TaskUpdate)) -> TaskResponse:
+async def update_task(task_update: TaskUpdate = Body(TaskUpdate)) -> TaskResponse:
     with db_manager.get_conn() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM tasks WHERE id = ?", (task_update.id,))
